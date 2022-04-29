@@ -1,0 +1,38 @@
+declare
+    cursor c1 is select *  from emp2;
+    type emp_typ is table of emp%rowtype;
+    emp_ty emp_typ;
+    DML_ERROR EXCEPTION;
+    PRAGMA EXCEPTION_INIT(DML_ERROR,-24381);
+    
+     l_errors number;
+    l_errno    number;
+    l_msg    varchar2(4000);
+    l_idx    number;
+begin 
+       open c1;
+       loop
+       fetch c1 bulk collect into emp_ty limit 10;
+       exit when emp_ty.count=0;
+                 begin 
+                      dbms_output.put_line('count :  '|| emp_ty.count);
+                      forall i in  emp_ty.first..emp_ty.last save exceptions 
+                      insert into EMP values emp_ty(i);
+                 exception when DML_ERROR
+                 then 
+                       l_errors := sql%bulk_exceptions.count;
+                       for i in 1 .. l_errors
+                            loop
+                                l_errno := sql%bulk_exceptions(i).error_code;
+                                l_msg   := sqlerrm(-l_errno);
+                                l_idx   := sql%bulk_exceptions(i).error_index;
+                            dbms_output.put_line('l_errno ' || l_errno);
+                            dbms_output.put_line('l_msg ' || l_msg);
+                            dbms_output.put_line('l_idx ' || l_idx);
+                            dbms_output.put_line('emp id  ' || emp_ty(l_idx).EMPLOYEE_ID);
+                            dbms_output.put_line('last name ' || emp_ty(l_idx).first_NAME);
+                       end loop; 
+                    end;             
+          end loop; 
+          close c1;
+end;
