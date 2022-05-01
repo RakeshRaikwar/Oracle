@@ -1,0 +1,299 @@
+set echo off
+set linesize 1000
+set trimspool on
+set feedback on
+set pagesize 40
+set wrap off
+set serveroutput on size unlimited
+
+spool EWS_7.0.0_db_instdba_validation.log
+
+DECLARE
+
+   gv_failure_count   INTEGER := 0;
+   gv_check_count     INTEGER := 0;
+   gcon_separator     CONSTANT VARCHAR2(200) := RPAD( '-', 100, '-');
+
+   TYPE validation_result IS RECORD (
+      is_success      BOOLEAN,
+      text VARCHAR2(32767)
+   );
+   lv_result validation_result;
+
+   PROCEDURE put( pv_text VARCHAR2 ) IS
+      BEGIN
+         DBMS_OUTPUT.PUT_LINE( pv_text );
+      END;
+
+   PROCEDURE put_start( pv_text VARCHAR2 ) IS
+      BEGIN
+         put(gcon_separator);
+         put('START '||pv_text);
+         put(' ');
+      END;
+
+   PROCEDURE put_end( pv_text VARCHAR2 ) IS
+      BEGIN
+         put(' ');
+         put('END '||pv_text);
+         put(gcon_separator);
+      END;
+
+   FUNCTION exists_txt( pv_not BOOLEAN ) RETURN VARCHAR2 IS
+      BEGIN
+         RETURN CASE WHEN pv_not THEN ' does not' END||' exists';
+      END;
+
+   FUNCTION is_valid_txt( pv_not BOOLEAN ) RETURN VARCHAR2 IS
+      BEGIN
+         RETURN CASE WHEN pv_not THEN ' is not' END||' valid';
+      END;
+
+   FUNCTION nullable_txt( pv_not BOOLEAN ) RETURN VARCHAR2 IS
+      BEGIN
+         RETURN ' is'||CASE WHEN pv_not THEN ' not' END||' nullable';
+      END;
+
+   FUNCTION equal_txt( pv_not BOOLEAN ) RETURN VARCHAR2 IS
+      BEGIN
+         RETURN ' is'||CASE WHEN pv_not THEN ' not' END||' equal';
+      END;
+
+   FUNCTION get_source_clob (p_owner VARCHAR2, p_name VARCHAR2, p_type VARCHAR2)
+       RETURN CLOB
+    IS
+       TYPE t_lines IS TABLE OF VARCHAR2 (32767);
+
+       v_lines        t_lines;
+       v_source       CLOB;
+       c_sql CONSTANT VARCHAR2 (4000) := q'[
+                   select
+                      text
+                     from dba_source o
+                    where o.owner = :owner and o.name = :name and o.type = :type
+                    ]';
+    BEGIN
+       DBMS_LOB.createtemporary (v_source, TRUE);
+
+       EXECUTE IMMEDIATE c_sql BULK COLLECT INTO v_lines USING p_owner, p_name, p_type;
+
+       FOR i IN 1 .. CARDINALITY (v_lines) LOOP
+          DBMS_LOB.writeappend (v_source, LENGTH (v_lines (i)), v_lines (i));
+       END LOOP;
+
+       RETURN v_source;
+    END;
+
+   FUNCTION get_long_text_column (p_owner VARCHAR2, p_object_name VARCHAR2, p_object_type VARCHAR2)
+      RETURN CLOB
+   IS
+      l_clob     CLOB;
+      l_buflen   NUMBER := 32767;
+      l_long_val VARCHAR2 (32767);
+      l_cursor   INTEGER := DBMS_SQL.open_cursor;
+      l_n        NUMBER;
+      l_long_len NUMBER;
+      l_curpos   NUMBER := 0;
+      l_sql      VARCHAR2 (32767);
+   BEGIN
+      IF p_object_type = 'VIEW' THEN
+        l_sql := 'SELECT text FROM dba_views WHERE owner = :l_owner AND view_name = :l_object_name';
+      ELSIF p_object_type = 'TRIGGER' THEN
+        l_sql := 'SELECT trigger_body from dba_triggers WHERE owner = :l_owner AND trigger_name = :l_object_name';
+      ELSE
+        RAISE_APPLICATION_ERROR(-20000, 'get_long_text_column: parameter p_object_type invalid. Should be ''VIEW'' or ''TRIGGER'' and is: '''||p_object_type||'''');
+      END IF;
+
+      DBMS_LOB.createtemporary (l_clob, TRUE);
+      DBMS_SQL.parse (l_cursor, l_sql, DBMS_SQL.native);
+      DBMS_SQL.bind_variable (l_cursor, ':l_owner', p_owner);
+      DBMS_SQL.bind_variable (l_cursor, ':l_object_name', p_object_name);
+
+      DBMS_SQL.define_column_long (l_cursor, 1);
+      l_n := DBMS_SQL.execute (l_cursor);
+
+      IF (DBMS_SQL.fetch_rows (l_cursor) > 0) THEN
+         LOOP
+            DBMS_SQL.column_value_long (
+               l_cursor,
+               1,
+               l_buflen,
+               l_curpos,
+               l_long_val,
+               l_long_len
+            );
+            l_curpos := l_curpos + l_long_len;
+            EXIT WHEN l_long_len = 0;
+            DBMS_LOB.writeappend (l_clob, l_long_len, l_long_val);
+         END LOOP;
+      END IF;
+      DBMS_SQL.close_cursor (l_cursor);
+      RETURN l_clob;
+   EXCEPTION
+      WHEN OTHERS THEN
+         IF DBMS_SQL.is_open (l_cursor) THEN
+            DBMS_SQL.close_cursor (l_cursor);
+         END IF;
+
+         DBMS_LOB.freetemporary (l_clob);
+         RAISE;
+   END;
+
+
+
+   FUNCTION constraint_exists( pv_owner VARCHAR2, pv_constraint_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count  INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_constraints
+         WHERE constraint_name = pv_constraint_name AND owner = pv_owner;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Constraint '||pv_owner||'.'||pv_constraint_name||exists_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+   FUNCTION constraint_does_not_exist( pv_owner VARCHAR2, pv_constraint_name VARCHAR2 ) RETURN validation_result IS
+      BEGIN
+         RETURN constraint_exists( pv_owner, pv_constraint_name, TRUE );
+      END;
+
+   FUNCTION index_exists( pv_owner VARCHAR2, pv_index_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count    INTEGER;
+      lv_result   validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_indexes
+         WHERE index_name = pv_index_name AND owner = pv_owner;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Index '||pv_owner||'.'||pv_index_name||exists_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+   FUNCTION index_does_not_exist( pv_owner VARCHAR2, pv_index_name VARCHAR2 ) RETURN validation_result IS
+      BEGIN
+         RETURN index_exists( pv_owner, pv_index_name, TRUE );
+      END;
+
+   FUNCTION column_nullable( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_column_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_tab_columns
+         WHERE table_name = pv_table_name AND column_name = pv_column_name AND owner = pv_owner AND nullable = 'Y';
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Column '||pv_owner||'.'||pv_table_name||'.'||pv_column_name||nullable_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+   FUNCTION column_not_nullable( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_column_name VARCHAR2 ) RETURN validation_result IS
+      BEGIN
+         RETURN column_nullable( pv_owner, pv_table_name, pv_column_name, TRUE );
+      END;
+
+   FUNCTION column_exists( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_column_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_tab_columns
+         WHERE table_name = pv_table_name AND column_name = pv_column_name AND owner = pv_owner;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Column '||pv_owner||'.'||pv_table_name||'.'||pv_column_name||exists_txt( pv_not );
+         RETURN lv_result;
+      END;
+	  
+   FUNCTION data_type_precision( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_column_name VARCHAR2, pv_precision number ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT DATA_PRECISION INTO lv_count FROM dba_tab_columns
+         WHERE table_name = pv_table_name AND column_name = pv_column_name AND owner = pv_owner;
+
+         lv_result.is_success := XOR (FALSE,(lv_count = pv_precision));
+         lv_result.text := 'Column '||pv_owner||'.'||pv_table_name||'.'||pv_column_name||' Precision is correct';
+         RETURN lv_result;
+      END;
+
+   FUNCTION column_does_not_exist( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_column_name VARCHAR2 ) RETURN validation_result IS
+      BEGIN
+         RETURN column_exists( pv_owner, pv_table_name, pv_column_name, TRUE );
+      END;
+
+   FUNCTION type_attr_exists( pv_owner VARCHAR2, pv_type_name VARCHAR2, pv_attr_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_type_attrs
+         WHERE type_name = pv_type_name AND attr_name = pv_attr_name AND owner = pv_owner;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Object attribute '||pv_owner||'.'||pv_type_name||'.'||pv_attr_name||exists_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+   FUNCTION type_attr_does_not_exist( pv_owner VARCHAR2, pv_type_name VARCHAR2, pv_attr_name VARCHAR2 ) RETURN validation_result IS
+      BEGIN
+         RETURN type_attr_exists( pv_owner, pv_type_name, pv_attr_name, TRUE );
+      END;
+
+   FUNCTION comment_exists( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_column_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_col_comments
+         WHERE table_name = pv_table_name AND column_name = pv_column_name AND owner = pv_owner AND comments IS NOT NULL;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Comment on '||pv_owner||'.'||pv_table_name||'.'||pv_column_name||exists_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+   FUNCTION comment_exists( pv_owner VARCHAR2, pv_table_name VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT COUNT(*) INTO lv_count FROM dba_tab_comments
+         WHERE table_name = pv_table_name AND owner = pv_owner  AND comments IS NOT NULL;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Comment on '||pv_owner||'.'||pv_table_name||exists_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+   FUNCTION object_valid( pv_owner VARCHAR2, pv_object_name VARCHAR2, pv_object_type VARCHAR2, pv_not BOOLEAN := FALSE ) RETURN validation_result IS
+      lv_count INTEGER;
+      lv_result validation_result;
+      BEGIN
+         SELECT CASE
+                WHEN COUNT(*) > 0 AND COUNT(*) = COUNT( DECODE( o.status, 'VALID', 1 ) )
+                   THEN 1
+                END
+         INTO lv_count FROM dba_objects o
+         WHERE o.object_name = pv_object_name AND o.owner = pv_owner and o.object_type = pv_object_type;
+
+         lv_result.is_success := XOR( pv_not, ( lv_count > 0 ) );
+         lv_result.text := 'Object '||pv_owner||'.'||pv_object_name||is_valid_txt( pv_not );
+         RETURN lv_result;
+      END;
+
+BEGIN 
+lv_result:= object_valid(user,'TESTING','FUNCTION') ;
+dbms_output.put_line(lv_result.text);
+if lv_result.is_success then 
+    dbms_output.put_line('true');
+else 
+    dbms_output.put_line('false');
+end if;
+lv_result:=type_attr_exists(user, 'BULK_TEST1', 'name');
+    dbms_output.put_line(lv_result.text);
+if lv_result.is_success then 
+    dbms_output.put_line('true');
+else 
+    dbms_output.put_line('false');
+end if;
+END;
+      
+      
+      
