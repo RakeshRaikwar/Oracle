@@ -1,0 +1,16 @@
+It's window service that written in C# that connect with application server and application server is connect with SQL server database,
+it's run a JOB call OSYS, it's up in morning. It's listen OPIC MQ
+OSMR is application folder inside log folder it keep log file daily as activity form morning 6.00 AM. If Holiday it's not compute, it's not harmful.
+create every 5 minuts. it's have internal timer.
+If there is no message it log with no new message, if message recive then it's message with MQ ID
+ITNL.OSMR.Host.ext is file that host as service. INTL all file are internal code.
+AppSetting.Production.json is is setting file in whic we can set duplicate message alert and archive.
+If any exception occer file got create with exception, MQ BACKEND OUT. it may couse IBM que.
+Message got inserted in MTS can found ARCHIVE folder.
+OUT Folder meaasge contain batch of message with $ dilimeter as seprator.
+Log folder file under OSMR folder use for analysis any issue.
+If duplicate message found application recover itself.
+If issue in MQ side it OPIC look out.
+Producer is OPIC and Consumer is OSMR. work on FIFO principal.
+Reconcale file contain summer of all messagage recived per day. like acknolwedge report.
+I
