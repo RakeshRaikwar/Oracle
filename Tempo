@@ -1,0 +1,70 @@
+### Minutes of Meeting
+
+**Date**: [Date of the Meeting]
+
+**Participants**: 
+- Carlos
+- Joe
+- Albert
+- Representatives from AppX team (names not specified)
+
+**Agenda**: 
+1. Overview of AppX team responsibilities and support structure
+2. Demonstration and discussion of the Tempo app
+3. Troubleshooting and maintenance of older applications
+4. Q&A
+
+---
+
+**1. Overview of AppX Team Responsibilities**
+
+- **Roles**:
+  - The AppX team is responsible for level one and level two support services.
+  - They will handle initial calls, troubleshoot issues, check server logs, and ensure IIS (Internet Information Services) functionality.
+  - Focus includes renewing certificates and managing TSS qualities.
+  - Joe's team will concentrate solely on development activities.
+
+- **Support Structure**:
+  - Separate team available for running with support personnel.
+  - AppX team will assist in troubleshooting, including server checks and certificate renewals.
+
+**2. Demonstration and Discussion of the Tempo App**
+
+- **Presentation**:
+  - Screen shared by an unspecified participant demonstrating the Tempo app.
+  - Highlighted the importance of the app in saving time for account relationship uploads.
+  - Mentioned how manual input is time-consuming and prone to errors.
+
+- **Functionality**:
+  - The Tempo app integrates with other systems, preventing manual data entry.
+  - Demonstrated how transactions are processed, validated, and submitted through the app.
+  - Example given where the app handled 78 account validations in about a minute.
+
+- **Issues and Incidents**:
+  - Emphasized the importance of the app’s uptime.
+  - Mentioned a significant incident where the app was down for three days, causing substantial delays.
+
+**3. Troubleshooting and Maintenance of Older Applications**
+
+- **Technological Challenges**:
+  - The app is built on older .NET frameworks, which complicates troubleshooting and maintenance.
+  - Modern libraries and APIs are easier to work with compared to older technologies.
+  - Instances of servers unexpectedly shutting down and the challenges in debugging and restoring them.
+
+- **Recent Incidents**:
+  - An example was given where penetration testing and subsequent modernization attempts led to several days of downtime.
+  - Frequent server patches lead to constant testing and potential breaks in the system.
+
+**4. Q&A**
+
+- **Frequency of Patches**:
+  - Patches are applied frequently, often without a specific schedule.
+  - A new CIO has enforced rigorous patching, leading to continuous updates and necessary subsequent testing.
+  - Patching can lead to system downtimes that require immediate attention.
+
+**Summary**:
+- The meeting covered the structure and responsibilities of the AppX team, the functionality and importance of the Tempo app, and the challenges associated with maintaining older applications. Frequent server patches were identified as a recurring challenge, requiring constant vigilance and testing.
+
+---
+
+These minutes capture the key points discussed in the meeting. If there are any further details or specific follow-up actions required, please provide additional context or the remaining part of the chat.
