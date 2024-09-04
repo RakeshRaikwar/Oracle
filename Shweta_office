@@ -1,0 +1,43 @@
+### Summary of Conversations:
+
+The two conversations focus on the architecture, support structure, and operational processes of a system with multiple applications and environments. The key points discussed cover the technical setup, troubleshooting, support roles, and documentation efforts within the organization.
+
+### Key Points:
+
+#### 1. **System Architecture and Applications**:
+   - **Core Applications**:
+     - **FTI (Financial Trade Infrastructure) Application**: Central to trade finance activities.
+     - **IBO Trade**: A customer-facing portal.
+     - **TradeStream**: A cloud-based service with AI components for document review, connected to on-prem systems via a converter.
+   - **Infrastructure**:
+     - **Windows Servers**: Hosting applications supported by IBM WebSphere and MQ solutions.
+     - **Oracle Database**: Shared across FTI, IBO Trade, and IBO FX applications.
+     - **Message Queue (MQ)**: Central to interconnecting various applications.
+
+#### 2. **Environments**:
+   - **Four Environments**: Development, staging, production, and disaster recovery (DR).
+   - **High Availability**: Present in the production environment, but not in others.
+
+#### 3. **Support Structure**:
+   - **Triage Process**:
+     - The primary task is **triage** to identify whether an issue is related to the application, database, network, or server.
+     - Once identified, issues are escalated to the relevant teams (e.g., DBA team, server hosting team).
+   - **Level 1 and Level 2 Support**:
+     - A **horizontal support team** composed of different MSPs supports over 500 applications. The team handles Level 1 and Level 2 activities across multiple applications.
+   - **Vendor Support**:
+     - The team interacts with vendors like Finastra, especially for issues that need escalation beyond internal support.
+
+#### 4. **Incident Management**:
+   - **ServiceNow**: Used to open incident tickets, which are automatically assigned based on priority.
+   - **Disaster Recovery**:
+     - **Annual DR Activities**: Performed in June, with the next scheduled DR activity set for the following year.
+
+#### 5. **Documentation and Runbooks**:
+   - The conversations emphasize the need for **comprehensive documentation** of processes, including creating runbooks that detail support activities, contact points, and procedures.
+   - These efforts aim to ensure that anyone new to the team can quickly understand the system and the support structure.
+
+#### 6. **Communication and Alerts**:
+   - **Alerts**: Primarily received through PagerDirect and emails, which trigger the triage process.
+   - **Distribution Lists**: Used for communication within the team and with the business units.
+
+These conversations provide a detailed overview of the system's architecture, the team's approach to support and incident management, and ongoing efforts to document processes for future scalability and efficiency.
