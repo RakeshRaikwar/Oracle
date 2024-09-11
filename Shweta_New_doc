@@ -1,0 +1,24 @@
+
+
+**Dynatrace System Usage (from Uploaded File)**
+
+**Login Process:**  
+You log into Dynatrace by entering your authentication after receiving a URL, leading to a dashboard.
+
+**Dashboard Navigation:**  
+- Search for servers or services, e.g., "IBOFX" servers.  
+- Monitoring of key metrics like CPU usage, memory, network I/O, and throughput.  
+- Custom dashboards can be created for different applications such as IBOFX.
+
+**Performance and Monitoring:**  
+- You monitor host performance, memory, network analysis, and disk usage.  
+- Important components include event logs and related certificates.  
+- Adding tags to databases and servers for quick access.
+
+**Additional Features:**  
+- You can inherit settings from existing configurations and create custom timeframes to monitor server performance.  
+- Focus on specific servers (e.g., "IBOFX plot") to monitor database details and host health.
+
+--- 
+
+The redundant "Road Number new" references have been removed.
