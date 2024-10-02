@@ -22,7 +22,7 @@ The text from the three files details a discussion about a financial application
    - The system relies heavily on scheduled jobs running on Windows Task Scheduler.
    - Legacy VBS scripts are still in use for report generation, though there's a suggestion to migrate these to PowerShell for better efficiency.
    - Various server environments are referenced, including SMRT servers and Kawa job management.
-
+Li
 6. **User & Incident Management**:
    - Incidents such as failed data transfers or incomplete reports are rare, occurring perhaps once a quarter.
    - Communication between users and the application team is crucial to identify and troubleshoot issues promptly, with rerun capabilities being a key part of this.
