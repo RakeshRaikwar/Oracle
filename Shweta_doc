@@ -1,0 +1,142 @@
+Here’s a detailed structure of how to consolidate the information from the three files into a well-organized document. I'll prepare it in sections to cover the key aspects of the application, technical workflow, infrastructure, and validation process:
+
+---
+
+# **Application Summary: Market Data Processing for FX Calculator**
+
+### **Overview**
+
+The application is responsible for fetching market data from the London Stock Exchange (LSEG) and generating a daily report (in PDF format) that contains currency rates and market data. This data is collected using scheduled scripts and processed within the system’s database. The PDF report is sent to designated recipients every morning at 7:30 AM.
+
+---
+
+### **Key Components**
+
+1. **Market Data Provider**:
+   - **LSEG** (London Stock Exchange Group) serves as the data source.
+   - It was previously called Refinitiv (Thomson Reuters).
+   - Data is fetched using an API and inserted into a SQL database.
+
+2. **Server Environment**:
+   - The application runs on two main servers referred to as **Kawa servers**.
+   - The servers are a part of the organization’s SMRT infrastructure.
+   - The **Windows Task Scheduler** is used to trigger jobs that collect, process, and report data.
+
+3. **Core Technologies**:
+   - **PowerShell** for scripting and automating tasks.
+   - **VBScripts** for legacy report generation (considered for migration to PowerShell).
+   - **.NET** for certain data processing functionalities.
+   - **SQL Server** for database management.
+
+4. **Job Scheduling**:
+   - **Primary Job**: The core script runs at **7:00 AM** daily to fetch market data and insert it into the database.
+   - **Verification Job**: A check runs at **7:15 AM** to ensure that the data has been successfully inserted.
+   - **Report Generation**: At **7:30 AM**, the system processes the data into a PDF report and emails it to a distribution list.
+
+---
+
+### **Application Workflow**
+
+1. **Data Collection**:
+   - A PowerShell script triggers the collection of market data from LSEG using an API call.
+   - The collected data is stored in a SQL Server database.
+   - The system runs checks at 7:15 AM to confirm that the data was inserted correctly.
+
+2. **Data Processing**:
+   - Once validated, the data is processed to generate a report.
+   - A legacy VBScript is used to generate an Excel spreadsheet containing the data, which is then converted into a PDF.
+
+3. **Report Distribution**:
+   - The final PDF report is automatically emailed to a distribution group of about 30 users, primarily dealing with FX benchmarks and supply chains.
+   - If any issues arise during data collection or processing, a rerun of the jobs can be initiated.
+
+4. **Error Handling & Reruns**:
+   - In case of a failure, such as missing or incomplete data, a rerun process can be executed.
+   - Users can request a rerun via a simple command, and the system will attempt to recollect and process the data.
+   - Any issues are manually investigated, particularly in verifying the connection to LSEG and the database insertion.
+
+---
+
+### **Infrastructure & Environment Details**
+
+1. **Servers**:
+   - The system is hosted on **Kawa Servers**, and the associated database is a **SQL Server**.
+   - The servers reside within the internal CNB (Corporate National Bank) environment.
+   - Connection to the vendor (LSEG) is managed via specific IP addresses.
+
+2. **Technologies & Frameworks**:
+   - The system relies on **PowerShell** and **VBScript** for job management and report generation.
+   - **.NET** components are used for file processing, while Java-based components manage part of the connection to LSEG.
+   - Monitoring tools like **Dynatrace** are available but not fully implemented for this application.
+
+3. **Job Management**:
+   - Jobs are handled via **Windows Task Scheduler**.
+   - The task scheduler triggers the PowerShell scripts at the designated times (7:00 AM and 7:15 AM).
+   - The **Carver job** manages the creation and distribution of the reports at 7:30 AM.
+
+---
+
+### **Disaster Recovery (DR) and Monitoring**
+
+1. **DR Procedures**:
+   - Disaster recovery is critical for ensuring the continuity of data collection and report distribution.
+   - The team uses a designated DR server for validation and reruns during emergencies.
+   - Access to the DR server is limited but can be expanded to authorized users for troubleshooting.
+
+2. **Monitoring**:
+   - The application lacks advanced automated monitoring but relies on manual verification by users.
+   - Future enhancements include integrating Dynatrace for better error detection and alerting systems for failed jobs.
+   - Incidents like failed data transfer or blank reports are rare but monitored closely. When they occur, manual investigation and reruns are triggered.
+
+3. **Incident Management**:
+   - Incidents such as failed data transfers, incomplete reports, or broken connections are tracked manually.
+   - A rerun process can address issues, where the team verifies the connection to LSEG, checks the database, and ensures the report is successfully generated and sent out.
+   - Major incidents typically occur once per quarter, often related to large data volumes or server issues.
+
+---
+
+### **Key Validation and Troubleshooting Steps**
+
+1. **Daily Validation**:
+   - Validate that the 7:00 AM PowerShell job successfully fetched data from LSEG and inserted it into the database.
+   - Check the 7:15 AM job to confirm that the data is in the correct format and ready for processing.
+
+2. **Rerun Process**:
+   - If a report does not contain data or an error occurs, initiate the rerun job.
+   - The rerun process involves manually triggering the PowerShell and VBScript jobs, and confirming successful data insertion in the database.
+
+3. **Database Checks**:
+   - Use the provided SQL queries to confirm data insertion.
+   - Ensure connection stability with LSEG and verify that market data is updated correctly.
+
+---
+
+### **Action Items & Future Enhancements**
+
+1. **Move to PowerShell**: Replace legacy VBScript with PowerShell to modernize the report generation process.
+2. **Implement Automated Monitoring**: Integrate Dynatrace for more proactive monitoring of the system and immediate incident alerts.
+3. **Improve Disaster Recovery**: Expand access to the DR server and refine the rerun process to minimize downtime during outages.
+4. **Review Job Scheduling**: Consider using a more robust scheduling tool than Windows Task Scheduler, especially for complex multi-step processes.
+5. **Enhanced Monitoring for Job Failures**: Add more robust logic to prevent blank reports from being generated and sent to users.
+
+---
+
+### **Contacts and Access Details**
+
+1. **Server Access**:
+   - Kawa Server (Primary): **IP Address: [REDACTED]**
+   - Database Server: **SQL Server, [REDACTED]**
+   - Vendor (LSEG) IP addresses: **[REDACTED]**
+
+2. **Monitoring and Logs**:
+   - **Dynatrace**: Not yet implemented for the specific application but used for general server monitoring.
+   - **Elk**: To be implemented for error logging and troubleshooting.
+   - **PagerDuty**: Not currently used for this application but considered for future integration.
+
+---
+
+This document summarizes the architecture, workflow, and operational details of the FX Calculator application, offering insight into how market data is processed and validated. Future improvements will focus on increasing automation, error detection, and operational resilience.
+
+---
+
+Does this layout suit your needs, or would you like to add any specific details? Let me know if you need any more modifications or additions!
