@@ -1,0 +1,31 @@
+The text from the three files details a discussion about a financial application that interacts with market data from the London Stock Exchange (LSEG), formerly known as Refinitiv. Here's a summary of the main points across the files:
+
+1. **Application Overview**: The application pulls market data from LSEG using an API, processes the data, and sends out a daily report in PDF format around 7:30 AM. This report contains currency rates or market data that is extracted and inserted into a SQL database via scheduled jobs using PowerShell scripts and legacy VBS scripts.
+
+2. **Workflow**:
+   - At 7:00 AM, a PowerShell script runs to collect data from LSEG.
+   - At 7:15 AM, a check is performed to verify if the data was successfully inserted into the database.
+   - At 7:30 AM, another script processes the data, generates a report in PDF format, and sends it to subscribers.
+   - If any issues occur (e.g., missing or incorrect data), a rerun can be initiated, which follows a similar process but allows for manual intervention.
+
+3. **Infrastructure & Tools**:
+   - The application runs on servers within the organization's network, using a SQL Server database. 
+   - Tools such as Dynatrace and Elk are mentioned, though not currently fully implemented for this application.
+   - Monitoring is done manually by users, with plans to improve by adding better checks and alerts.
+   - There is mention of DR (Disaster Recovery) processes and tests, indicating procedures for maintaining continuity in case of failure.
+
+4. **Validation and Reruns**:
+   - The validation process involves ensuring that data from LSEG is correctly inserted into the database.
+   - A rerun can be initiated if issues arise, and a specific workflow using PowerShell and VBS scripts recreates and resends the report.
+
+5. **Technical Details**:
+   - The system relies heavily on scheduled jobs running on Windows Task Scheduler.
+   - Legacy VBS scripts are still in use for report generation, though there's a suggestion to migrate these to PowerShell for better efficiency.
+   - Various server environments are referenced, including SMRT servers and Kawa job management.
+
+6. **User & Incident Management**:
+   - Incidents such as failed data transfers or incomplete reports are rare, occurring perhaps once a quarter.
+   - Communication between users and the application team is crucial to identify and troubleshoot issues promptly, with rerun capabilities being a key part of this.
+   - The application has about 30 users receiving the reports, and issues are typically raised by them when something goes wrong.
+
+In summary, the files discuss the structure and operation of a financial data processing application, its dependencies, the workflow for generating reports, and the procedures for handling failures.
