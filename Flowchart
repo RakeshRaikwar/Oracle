@@ -1,0 +1,35 @@
+I understand that you would like to create a Word document for a flowchart related to CNB application support based on the image you've uploaded. Let me summarize the flowchart, and I will prepare the text accordingly for you to include in a Word document.
+
+### CNB Application Support Flowchart
+
+#### Level 1:
+1. **Incident Identification**  
+   Initial detection or reporting of an issue within the CNB application.
+   
+2. **Incident Logging**  
+   Recording the details of the incident for tracking and analysis.
+
+3. **Initial Support**  
+   First-level support attempts to resolve the issue.
+   
+   - **Resolved?**  
+     - **Yes:** Close the incident.
+     - **No:** Proceed to Level 2.
+
+#### Level 2:
+1. **Investigate & Remediate**  
+   Further investigation and remediation efforts by a more specialized support team.
+
+   - **Resolved?**  
+     - **Yes:** Close the incident.
+     - **No:** Proceed to Level 3.
+
+#### Level 3:
+1. **Investigate & Remediate**  
+   Continuation of remediation actions for unresolved issues.
+
+   - **Continue:** If the problem remains unresolved, further remediation efforts will continue.
+
+---
+
+Would you like me to prepare this flowchart in a visual format (like a Word file or an image) or would you prefer to adjust the text flowchart into the document yourself? Let me know how you'd like to proceed.
