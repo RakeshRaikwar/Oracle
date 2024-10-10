@@ -1,0 +1,25 @@
+To ensure that the formatting of your flowchart in Word remains intact, especially when sharing or moving the document across different platforms or devices, here are some best practices:
+
+### 1. **Embed Fonts (If Any Custom Fonts Were Used)**:
+- Go to **File** > **Options** > **Save**.
+- Check the box next to **Embed fonts in the file** under the "Preserve fidelity when sharing this document" section.
+
+### 2. **Group the Shapes**:
+- Select all the shapes in your flowchart by holding down the **Ctrl** key and clicking on each shape.
+- Right-click and choose **Group** > **Group**. This will lock the relative positions of the shapes, ensuring they stay aligned.
+
+### 3. **Save as PDF**:
+- Saving the document as a PDF will preserve all formatting exactly as it appears on your screen.
+- Go to **File** > **Save As** and select **PDF** as the file type.
+
+### 4. **Use Page Breaks**:
+- If your flowchart spans multiple sections or pages, insert **Page Breaks** to ensure consistent layout. Go to **Insert** > **Page Break**.
+
+### 5. **Lock Anchors for Shapes** (Optional):
+- If you're worried about shapes moving around when text or content is edited, you can lock the anchor for each shape.
+- Right-click on a shape, choose **More Layout Options**, then in the "Position" tab, select **Lock Anchor**.
+
+### 6. **Turn off Compatibility Mode** (if applicable):
+- If you're working in an older Word format (e.g., `.doc` instead of `.docx`), switch to the `.docx` format to enable all modern Word features. Go to **File** > **Convert**.
+
+These steps will help ensure that your flowchart retains its formatting, especially when shared or opened on other systems.
